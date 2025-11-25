@@ -1,8 +1,37 @@
- name: Upload debug files
- uses: actions/upload-artifact@v4
+name: Guns Bot
+
+on:
+  schedule:
+    - cron: "0 * * * *"   # roda 1 vez por hora (às 00:00 min)
+  workflow_dispatch:
+
+jobs:
+  run_bot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Monitor
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python guns_bot.py
+
+      - name: Upload debug files
+        uses: actions/upload-artifact@v4
         with:
           name: debug-files
           path: |
-            debug_fortaleza.html
             debug_fullpage.html
+            debug_fortaleza.html
         if: always()
