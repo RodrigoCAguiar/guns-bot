@@ -1,6 +1,5 @@
 import requests
 from bs4 import BeautifulSoup
-import time
 
 URL = "https://www.gunsnroses.com/tour"
 
@@ -37,7 +36,6 @@ def verificar_ingressos():
                     elif "PUBLIC" in t.upper():
                         status_publico = t
 
-                # PRINTA APENAS O QUE IMPORTA
                 log(f"STATUS NIGHTRAIN: {status_nightrain}")
                 log(f"STATUS PUBLICO:   {status_publico}")
 
@@ -45,17 +43,18 @@ def verificar_ingressos():
                 pub_open   = status_publico and ("COMING SOON" not in status_publico.upper())
 
                 if night_open or pub_open:
-                    log("⚠️ INGRESSOS ABERTOS!\n")
-                else:
-                    log("Ainda indisponivel.\n")
+                    log("⚠️ INGRESSOS ABERTOS!")
 
-                break
+                else:
+                    log("Ainda indisponivel.")
+
+                return  # ENCERRA O SCRIPT DEPOIS DE UMA VERIFICAÇÃO
+
+        # Se não achou o bloco da cidade
+        log("Fortaleza nao encontrada.")
 
     except Exception as e:
         log(f"Erro: {e}")
 
-
-if __name__ == "__main__":
-    while True:
-        verificar_ingressos()
-        time.sleep(60)
+# EXECUTA APENAS UMA VEZ
+verificar_ingressos()
