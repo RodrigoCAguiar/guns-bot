@@ -60,7 +60,7 @@ def monitor():
             "🎸 *GUNS N' ROSES — FORTALEZA*\n"
             f"📍 Cidade: {city}\n\n"
             f"🔐 Nightrain: {statuses[0] if len(statuses) > 0 else 'N/A'}\n"
-            f"🎟 Público: {statuses[1] if len(statuses) > 1 else 'N/A'}"
+            f"🎟 Público: {statuses[1] if len(statuses) > 1 else 'N/A'}\n"
             f"Acesse: https://www.gunsnroses.com/tour"
         )
 
@@ -74,5 +74,6 @@ def monitor():
 
 if __name__ == "__main__":
     monitor()
+
 
 
