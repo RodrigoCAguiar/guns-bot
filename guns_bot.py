@@ -1,39 +1,32 @@
-import os
 import requests
 from bs4 import BeautifulSoup
+import os
 
 URL = "https://www.gunsnroses.com/tour"
 
-def enviar_alerta_telegram(mensagem):
-    """Envia uma mensagem para o Telegram usando a API."""
-    # 1. Carrega as chaves do GitHub Secrets
-    token = os.getenv('TELEGRAM_TOKEN')
-    chat_id = os.getenv('TELEGRAM_CHAT_ID')
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
-    if not token or not chat_id:
-        log("ERRO: Token ou Chat ID do Telegram não configurados nas Secrets do GitHub.")
-        return
-
-    # 2. Define o endpoint da API do Telegram
-    url = f"https://api.telegram.org/bot{token}/sendMessage"
-    
-    # 3. Prepara o payload (o conteúdo da mensagem)
-    payload = {
-        'chat_id': chat_id,
-        'text': mensagem,
-        'parse_mode': 'Markdown' # Permite formatação em negrito, etc.
-    }
-
-    try:
-        # 4. Envia a requisição POST
-        response = requests.post(url, data=payload, timeout=10)
-        response.raise_for_status()
-        log("✅ Alerta de Telegram enviado com sucesso!")
-    except Exception as e:
-        log(f"❌ Falha ao enviar alerta para o Telegram: {e}")
 
 def log(msg):
     print(msg, flush=True)
+
+
+def send_telegram(msg):
+    if TELEGRAM_TOKEN and TELEGRAM_CHAT_ID:
+        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+        data = {
+            "chat_id": TELEGRAM_CHAT_ID,
+            "text": msg
+        }
+        try:
+            requests.post(url, data=data, timeout=10)
+            log("Alerta enviado ao Telegram.")
+        except Exception as e:
+            log(f"Erro ao enviar Telegram: {e}")
+    else:
+        log("TELEGRAM_TOKEN ou TELEGRAM_CHAT_ID não configurados.")
+
 
 def verificar_ingressos():
     try:
@@ -72,19 +65,23 @@ def verificar_ingressos():
                 pub_open   = status_publico and ("COMING SOON" not in status_publico.upper())
 
                 if night_open or pub_open:
-                    log("⚠️ INGRESSOS ABERTOS!")
-
+                    alerta = (
+                        "⚠️ INGRESSOS ABERTOS EM FORTALEZA!\n\n"
+                        f"NightTrain: {status_nightrain}\n"
+                        f"Publico:    {status_publico}\n"
+                        "\nAcesse: https://www.gunsnroses.com/tour"
+                    )
+                    send_telegram(alerta)
                 else:
                     log("Ainda indisponivel.")
 
-                return  # ENCERRA O SCRIPT DEPOIS DE UMA VERIFICAÇÃO
+                return
 
-        # Se não achou o bloco da cidade
         log("Fortaleza nao encontrada.")
 
     except Exception as e:
         log(f"Erro: {e}")
 
+
 # EXECUTA APENAS UMA VEZ
 verificar_ingressos()
-
