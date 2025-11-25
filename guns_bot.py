@@ -14,7 +14,11 @@ def send_telegram(msg):
         return
 
     url = f"https://api.telegram.org/bot{token}/sendMessage"
-    payload = {"chat_id": chat_id, "text": msg}
+    payload = {
+        "chat_id": chat_id,
+        "text": msg,
+        "parse_mode": "Markdown"   # 👉 ativa formatação
+    }
 
     try:
         requests.post(url, json=payload, timeout=10)
@@ -37,7 +41,6 @@ def monitor():
 
     for panel in panels:
 
-        # Local do show
         city_tag = panel.find("div", class_="tourLocation__city")
         if not city_tag:
             continue
@@ -49,31 +52,28 @@ def monitor():
 
         print(f"Show encontrado: {city}")
 
-        # Pega todos os spans
         spans = panel.find_all("span")
         statuses = [s.get_text(strip=True) for s in spans if s.get_text(strip=True)]
 
         nightrain = statuses[0] if len(statuses) > 0 else "N/A"
         publico   = statuses[1] if len(statuses) > 1 else "N/A"
 
-        # --- NOVO SISTEMA DE TÍTULO CLARO ----
-        # Se NightTrain OU Público mudou de "COMING SOON", então abriu
         night_open = "COMING SOON" not in nightrain.upper()
         pub_open   = "COMING SOON" not in publico.upper()
 
+        # 👉 AQUI DEFINIMOS O TÍTULO
         if night_open or pub_open:
-            titulo = "🚨 INGRESSOS ABERTOS — FORTALEZA!"
+            titulo = "🚨 *INGRESSOS ABERTOS — FORTALEZA!*"
         else:
-            titulo = "❌ Ainda indisponível — Fortaleza"
+            titulo = "❌ *Ainda indisponível — Fortaleza*"
 
-        # Mensagem final enviada ao Telegram
         msg = (
             f"{titulo}\n\n"
-            "🎸 *GUNS N' ROSES — FORTALEZA*\n"
-            f"📍 Cidade: {city}\n\n"
-            f"🔐 Nightrain: {nightrain}\n"
-            f"🎟 Público: {publico}\n"
-            f"Acesse: https://www.gunsnroses.com/tour"
+            f"🎸 *GUNS N' ROSES — FORTALEZA*\n"
+            f"📍 *Cidade:* `{city}`\n\n"
+            f"🔐 *Nightrain:* `{nightrain}`\n"
+            f"🎟 *Público:* `{publico}`\n\n"
+            f"🔗 [Acessar página oficial](https://www.gunsnroses.com/tour)"
         )
 
         print(msg)
