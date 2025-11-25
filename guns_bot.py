@@ -32,24 +32,27 @@ def verificar_ingressos():
 
         shows = soup.select(".tourListPanel")
 
+        # DEBUG: salvar o HTML completo para inspeção
+        with open("debug_fullpage.html", "w", encoding="utf-8") as f:
+            f.write(html)
+
+        encontrou_fortaleza = False
+
         for show in shows:
             cidade_el = show.select_one(".tourLocation__city")
             if not cidade_el:
                 continue
 
             cidade = cidade_el.get_text(strip=True)
-
-            # DEBUG – ver todas as cidades encontradas
             log(f"ENCONTREI CIDADE: {cidade}")
 
-            if "Fortaleza" in cidade or "FORTALEZA" in cidade.upper():
-                log("FORTALEZA ENCONTRADA – SALVANDO HTML DE DEBUG")
+            if "FORTALEZA" in cidade.upper():
+                encontrou_fortaleza = True
 
-                # DEBUG — salvar HTML REAL que o GitHub Actions está vendo
+                # DEBUG: salvar apenas o bloco
                 with open("debug_fortaleza.html", "w", encoding="utf-8") as f:
                     f.write(show.prettify())
 
-                # processar spans
                 spans = [
                     s.get_text(strip=True)
                     for s in show.find_all("span")
@@ -84,11 +87,11 @@ def verificar_ingressos():
 
                 return
 
-        log("Fortaleza nao encontrada neste ciclo.")
+        if not encontrou_fortaleza:
+            log("⚠️ Fortaleza não encontrada! Salvando fullpage para debug.")
 
     except Exception as e:
         log(f"Erro: {e}")
 
 
-# --- EXECUTA APENAS UMA VEZ ---
 verificar_ingressos()
