@@ -28,7 +28,6 @@ def monitor():
     try:
         r = requests.get(URL, timeout=20)
         html = r.text
-
     except Exception as e:
         print("Erro ao baixar página:", e)
         return
@@ -45,35 +44,44 @@ def monitor():
 
         city = city_tag.get_text(strip=True)
 
-        # procuramos Fortaleza
         if not city.startswith(TARGET_CITY):
             continue
 
         print(f"Show encontrado: {city}")
 
-        # pega todos os spans (status)
+        # Pega todos os spans
         spans = panel.find_all("span")
         statuses = [s.get_text(strip=True) for s in spans if s.get_text(strip=True)]
 
-        # envia alerta detalhado
+        nightrain = statuses[0] if len(statuses) > 0 else "N/A"
+        publico   = statuses[1] if len(statuses) > 1 else "N/A"
+
+        # --- NOVO SISTEMA DE TÍTULO CLARO ----
+        # Se NightTrain OU Público mudou de "COMING SOON", então abriu
+        night_open = "COMING SOON" not in nightrain.upper()
+        pub_open   = "COMING SOON" not in publico.upper()
+
+        if night_open or pub_open:
+            titulo = "🚨 INGRESSOS ABERTOS — FORTALEZA!"
+        else:
+            titulo = "❌ Ainda indisponível — Fortaleza"
+
+        # Mensagem final enviada ao Telegram
         msg = (
+            f"{titulo}\n\n"
             "🎸 *GUNS N' ROSES — FORTALEZA*\n"
             f"📍 Cidade: {city}\n\n"
-            f"🔐 Nightrain: {statuses[0] if len(statuses) > 0 else 'N/A'}\n"
-            f"🎟 Público: {statuses[1] if len(statuses) > 1 else 'N/A'}\n"
+            f"🔐 Nightrain: {nightrain}\n"
+            f"🎟 Público: {publico}\n"
             f"Acesse: https://www.gunsnroses.com/tour"
         )
 
         print(msg)
         send_telegram(msg)
-
-        return  # finaliza pois Fortaleza já foi tratada
+        return
 
     print("Fortaleza não encontrada.")
 
 
 if __name__ == "__main__":
     monitor()
-
-
-
