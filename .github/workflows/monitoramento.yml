@@ -26,12 +26,4 @@ jobs:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python guns_bot.py
-
-      - name: Upload debug files
-        uses: actions/upload-artifact@v4
-        with:
-          name: debug-files
-          path: |
-            debug_fullpage.html
-            debug_fortaleza.html
-        if: always()
+        
