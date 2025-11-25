@@ -1,7 +1,36 @@
+import os
 import requests
 from bs4 import BeautifulSoup
 
 URL = "https://www.gunsnroses.com/tour"
+
+def enviar_alerta_telegram(mensagem):
+    """Envia uma mensagem para o Telegram usando a API."""
+    # 1. Carrega as chaves do GitHub Secrets
+    token = os.getenv('TELEGRAM_TOKEN')
+    chat_id = os.getenv('TELEGRAM_CHAT_ID')
+
+    if not token or not chat_id:
+        log("ERRO: Token ou Chat ID do Telegram não configurados nas Secrets do GitHub.")
+        return
+
+    # 2. Define o endpoint da API do Telegram
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    
+    # 3. Prepara o payload (o conteúdo da mensagem)
+    payload = {
+        'chat_id': chat_id,
+        'text': mensagem,
+        'parse_mode': 'Markdown' # Permite formatação em negrito, etc.
+    }
+
+    try:
+        # 4. Envia a requisição POST
+        response = requests.post(url, data=payload, timeout=10)
+        response.raise_for_status()
+        log("✅ Alerta de Telegram enviado com sucesso!")
+    except Exception as e:
+        log(f"❌ Falha ao enviar alerta para o Telegram: {e}")
 
 def log(msg):
     print(msg, flush=True)
@@ -58,3 +87,4 @@ def verificar_ingressos():
 
 # EXECUTA APENAS UMA VEZ
 verificar_ingressos()
+
