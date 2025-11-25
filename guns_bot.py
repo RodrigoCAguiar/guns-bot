@@ -61,6 +61,7 @@ def monitor():
             f"📍 Cidade: {city}\n\n"
             f"🔐 Nightrain: {statuses[0] if len(statuses) > 0 else 'N/A'}\n"
             f"🎟 Público: {statuses[1] if len(statuses) > 1 else 'N/A'}"
+            f"Acesse: https://www.gunsnroses.com/tour"
         )
 
         print(msg)
@@ -73,4 +74,5 @@ def monitor():
 
 if __name__ == "__main__":
     monitor()
+
 
