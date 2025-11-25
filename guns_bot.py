@@ -17,7 +17,7 @@ def send_telegram(msg):
     payload = {
         "chat_id": chat_id,
         "text": msg,
-        "parse_mode": "Markdown"   # 👉 ativa formatação
+        "parse_mode": "Markdown"
     }
 
     try:
@@ -58,14 +58,20 @@ def monitor():
         nightrain = statuses[0] if len(statuses) > 0 else "N/A"
         publico   = statuses[1] if len(statuses) > 1 else "N/A"
 
+        # Detecta abertura
         night_open = "COMING SOON" not in nightrain.upper()
         pub_open   = "COMING SOON" not in publico.upper()
 
-        # 👉 AQUI DEFINIMOS O TÍTULO
-        if night_open or pub_open:
-            titulo = "🚨 *INGRESSOS ABERTOS — FORTALEZA!*"
+        # ------------------------------------------------------
+        #      DEFINIÇÃO DO TÍTULO SUPER EXPLÍCITO
+        # ------------------------------------------------------
+        if pub_open:
+            titulo = "🎟 *VENDAS ABERTAS AO PÚBLICO — FORTALEZA!*"
+        elif night_open:
+            titulo = "🔐 *PRÉ-VENDA NIGHTRAIN ABERTA — FORTALEZA!*"
         else:
             titulo = "❌ *Ainda indisponível — Fortaleza*"
+        # ------------------------------------------------------
 
         msg = (
             f"{titulo}\n\n"
