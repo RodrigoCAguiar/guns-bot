@@ -13,25 +13,22 @@ def log(msg):
 
 
 def send_telegram(msg):
-    if TELEGRAM_TOKEN and TELEGRAM_CHAT_ID:
-        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-        data = {
-            "chat_id": TELEGRAM_CHAT_ID,
-            "text": msg
-        }
-        try:
-            requests.post(url, data=data, timeout=10)
-            log("Alerta enviado ao Telegram.")
-        except Exception as e:
-            log(f"Erro ao enviar Telegram: {e}")
-    else:
-        log("TELEGRAM_TOKEN ou TELEGRAM_CHAT_ID não configurados.")
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    data = {"chat_id": TELEGRAM_CHAT_ID, "text": msg}
+
+    try:
+        r = requests.post(url, data=data, timeout=10)
+        log(f"Telegram Status: {r.status_code}")
+        log(f"Resposta do Telegram: {r.text}")
+    except Exception as e:
+        log(f"Erro ao enviar Telegram: {e}")
 
 
 def verificar_ingressos():
     try:
         response = requests.get(URL, timeout=20)
-        soup = BeautifulSoup(response.text, "html.parser")
+        html = response.text
+        soup = BeautifulSoup(html, "html.parser")
 
         shows = soup.select(".tourListPanel")
 
@@ -42,7 +39,17 @@ def verificar_ingressos():
 
             cidade = cidade_el.get_text(strip=True)
 
-            if "Fortaleza" in cidade:
+            # DEBUG – ver todas as cidades encontradas
+            log(f"ENCONTREI CIDADE: {cidade}")
+
+            if "Fortaleza" in cidade or "FORTALEZA" in cidade.upper():
+                log("FORTALEZA ENCONTRADA – SALVANDO HTML DE DEBUG")
+
+                # DEBUG — salvar HTML REAL que o GitHub Actions está vendo
+                with open("debug_fortaleza.html", "w", encoding="utf-8") as f:
+                    f.write(show.prettify())
+
+                # processar spans
                 spans = [
                     s.get_text(strip=True)
                     for s in show.find_all("span")
@@ -62,14 +69,14 @@ def verificar_ingressos():
                 log(f"STATUS PUBLICO:   {status_publico}")
 
                 night_open = status_nightrain and ("COMING SOON" not in status_nightrain.upper())
-                pub_open   = status_publico and ("COMING SOON" not in status_publico.upper())
+                pub_open = status_publico and ("COMING SOON" not in status_publico.upper())
 
                 if night_open or pub_open:
                     alerta = (
-                        "⚠️ INGRESSOS ABERTOS EM FORTALEZA!\n\n"
+                        "⚠️ INGRESSOS ABERTOS!\n\n"
                         f"NightTrain: {status_nightrain}\n"
                         f"Publico:    {status_publico}\n"
-                        "\nAcesse: https://www.gunsnroses.com/tour"
+                        "Link: https://www.gunsnroses.com/tour"
                     )
                     send_telegram(alerta)
                 else:
@@ -77,13 +84,11 @@ def verificar_ingressos():
 
                 return
 
-        log("Fortaleza nao encontrada.")
+        log("Fortaleza nao encontrada neste ciclo.")
 
     except Exception as e:
         log(f"Erro: {e}")
 
 
-# EXECUTA APENAS UMA VEZ
-send_telegram("🔔 TESTE: GitHub Actions está enviando mensagens corretamente!")
+# --- EXECUTA APENAS UMA VEZ ---
 verificar_ingressos()
-
