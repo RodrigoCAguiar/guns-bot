@@ -29,10 +29,6 @@ def monitor():
         r = requests.get(URL, timeout=20)
         html = r.text
 
-        # Salva página completa
-        with open("debug_fullpage.html", "w", encoding="utf-8") as f:
-            f.write(html)
-
     except Exception as e:
         print("Erro ao baixar página:", e)
         return
@@ -54,10 +50,6 @@ def monitor():
             continue
 
         print(f"Show encontrado: {city}")
-
-        # salva bloco Fortaleza para debug
-        with open("debug_fortaleza.html", "w", encoding="utf-8") as f:
-            f.write(str(panel))
 
         # pega todos os spans (status)
         spans = panel.find_all("span")
@@ -81,3 +73,4 @@ def monitor():
 
 if __name__ == "__main__":
     monitor()
+
