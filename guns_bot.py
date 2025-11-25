@@ -84,4 +84,6 @@ def verificar_ingressos():
 
 
 # EXECUTA APENAS UMA VEZ
+send_telegram("🔔 TESTE: GitHub Actions está enviando mensagens corretamente!")
 verificar_ingressos()
+
